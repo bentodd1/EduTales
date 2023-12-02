@@ -62,9 +62,9 @@ class StoryRequestController extends Controller
         $storyRequest->save();
         $storyRequest = $this->extractPagesFromResponse($storyRequest);
         $storyRequest = $this->generateImages($storyRequest);
-        $this->generatePdf($storyRequest);
+        return $this->generatePdf($storyRequest);
         // Redirect or return response
-        return redirect('/story-request')->with('success', 'Story request submitted successfully!');
+      //  return redirect('/story-request')->with('success', 'Story request submitted successfully!');
     }
 
     private function preparePrompt($storyRequest)
