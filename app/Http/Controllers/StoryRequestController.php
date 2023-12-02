@@ -62,10 +62,9 @@ class StoryRequestController extends Controller
         $storyRequest->save();
         $storyRequest = $this->extractPagesFromResponse($storyRequest);
         $storyRequest = $this->generateImages($storyRequest);
-        return $this->generatePdf($storyRequest);
-
+        $this->generatePdf($storyRequest);
         // Redirect or return response
-       // return redirect('/story-request')->with('success', 'Story request submitted successfully!');
+        return redirect('/story-request')->with('success', 'Story request submitted successfully!');
     }
 
     private function preparePrompt($storyRequest)
@@ -121,6 +120,7 @@ class StoryRequestController extends Controller
     public function generateImages(StoryRequest $storyRequest) {
         $openai =  OpenAI::client(env('OPENAI_API_KEY'));
         foreach ($storyRequest->storyPages as $page) {
+            try {
                 $imageResponse = $openai->images()->create([
                     'model' => "dall-e-3",
                     'prompt' => $page->content,
@@ -131,24 +131,28 @@ class StoryRequestController extends Controller
                 $imageUrl = $imageResponse->data[0]->url; // Adjust based on actual API response
                 $page->image_url = $imageUrl;
                 $page->save();
-                $url = $this->downloadAndUploadImage($page->image_url);
-              //  $page->spaces_image_url = Storage::disk('do_spaces')->url($name);
+                $url = $this->downloadAndUploadImage($page);
+                //  $page->spaces_image_url = Storage::disk('do_spaces')->url($name);
                 $page->spaces_image_url = $url;
                 $page->save();
+            }
+            catch (\Exception $e) {
+
+            }
         }
         return $storyRequest;
     }
 
-    public function downloadAndUploadImage($imageUrl):string
+    public function downloadAndUploadImage(StoryPage $page):string
     {
         $client = new Client();
-        $response = $client->get($imageUrl);
-
+        $response = $client->get($page->image_url);
+        $requestId = $page->story_request_id;
         if ($response->getStatusCode() == 200) {
             $imageContent = $response->getBody()->getContents();
 
             // Generate a unique name for the image file
-            $imageName = 'images/' . uniqid() . '.png';
+            $imageName = '$requestId/' . uniqid() . '.png';
 
             // Save the image to DigitalOcean Spaces
             Storage::disk('do_spaces')->put($imageName, $imageContent);
