@@ -43,7 +43,7 @@ class StoryRequestController extends Controller
             'page_number' => $validatedData['page_number']
         ]);
         $storyRequest->save();
-
+        set_time_limit(400);
         // Handle sight words if provided
         if (!empty($validatedData['sight_words'])) {
             $sightWords = explode(',', $validatedData['sight_words']);
