@@ -43,7 +43,6 @@ class StoryRequestController extends Controller
             'page_number' => $validatedData['page_number']
         ]);
         $storyRequest->save();
-        set_time_limit(400);
         // Handle sight words if provided
         if (!empty($validatedData['sight_words'])) {
             $sightWords = explode(',', $validatedData['sight_words']);
@@ -152,7 +151,7 @@ class StoryRequestController extends Controller
             $imageContent = $response->getBody()->getContents();
 
             // Generate a unique name for the image file
-            $imageName = '$requestId/' . uniqid() . '.png';
+            $imageName = "$requestId/" . uniqid() . '.png';
 
             // Save the image to DigitalOcean Spaces
             Storage::disk('do_spaces')->put($imageName, $imageContent);
