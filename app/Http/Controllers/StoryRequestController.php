@@ -8,6 +8,7 @@ use App\Models\StoryPage;
 use App\Models\StoryRequest;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use OpenAI;
 
@@ -136,7 +137,7 @@ class StoryRequestController extends Controller
                 $page->save();
             }
             catch (\Exception $e) {
-
+                Log::error('DALL-E API Call Failure: ' . $e->getMessage());
             }
         }
         return $storyRequest;
