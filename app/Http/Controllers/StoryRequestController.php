@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendPdfJob;
 use App\Models\GradeLevel;
 use App\Models\SightWord;
 use App\Models\StoryPage;
@@ -11,10 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use OpenAI;
-
-use Barryvdh\DomPDF\PDF;
-use function PHPUnit\Framework\throwException;
-
 
 class StoryRequestController extends Controller
 {
@@ -62,9 +59,11 @@ class StoryRequestController extends Controller
         $storyRequest->save();
         $storyRequest = $this->extractPagesFromResponse($storyRequest);
         $storyRequest = $this->generateImages($storyRequest);
-        return $this->generatePdf($storyRequest);
+        dispatch(new SendPdfJob($storyRequest));
+
+       // return $this->generatePdf($storyRequest);
         // Redirect or return response
-      //  return redirect('/story-request')->with('success', 'Story request submitted successfully!');
+        return redirect('/story-request')->with('success', 'Story request submitted successfully!');
     }
 
     private function preparePrompt($storyRequest)
