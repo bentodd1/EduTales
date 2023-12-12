@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Include SweetAlert CSS and JS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Story Request</title>
@@ -107,9 +109,17 @@
     </form>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 <script>
-    document.getElementById('storyRequestForm').onsubmit = function() {
-        document.getElementById('loadingSpinner').style.display = 'block';
+    window.onload = function() {
+        @if(session('success'))
+        Swal.fire({
+            title: 'Success!',
+            text: "{{ session('success') }}",
+            icon: 'success',
+            confirmButtonText: 'Cool'
+        });
+        @endif
     };
 </script>
 

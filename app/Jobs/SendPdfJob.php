@@ -2,10 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Models\StoryPage;
+use GuzzleHttp\Client;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\StoryRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use OpenAI;
 
 class SendPdfJob implements ShouldQueue
 {
@@ -18,6 +22,16 @@ class SendPdfJob implements ShouldQueue
 
     public function handle()
     {
+        $prompt = $this->preparePrompt($this->storyRequest);
+
+        // Call ChatGPT API
+        $responseText = $this->callChatGptApi($prompt);
+
+        $this->storyRequest->chatgpt_response = $responseText;
+        $this->storyRequest->save();
+        $this->storyRequest = $this->extractPagesFromResponse($this->storyRequest);
+        $this->storyRequest = $this->generateImages($this->storyRequest);
+
         $storyName = "story_' . $this->storyRequest->id";
         $pdfFilePath = 'temp/story_' . $this->storyRequest->id . '.pdf';
 
@@ -56,5 +70,121 @@ class SendPdfJob implements ShouldQueue
         // Clean up and delete the local PDF file
         Storage::disk('local')->delete($pdfFilePath);
     }
+
+    private function preparePrompt(StoryRequest $storyRequest)
+    {
+        $pageNumbers = $storyRequest->page_number;
+        $gradeLevel = $storyRequest->gradeLevel->name; // Assuming GradeLevel has a 'name' field
+        $subject = $storyRequest->subject;
+        $description = $storyRequest->description;
+
+        // Retrieve sight words from the relationship
+        $sightWordsString = $storyRequest->sightWords->pluck('word')->implode(', ');
+
+        return "Write a {$pageNumbers}-page {$gradeLevel} level reading story that includes {$subject} and {$description}. The output should just be Page Number: followed by text and nothing else. The first page should be the title page.  Please include the words {$sightWordsString}.";
+
+    }
+
+
+    public function extractPagesFromResponse(StoryRequest $storyRequest) {
+        $responseText = $storyRequest->chatgpt_response;
+        $pages = explode("Page ", $responseText);
+        array_shift($pages);
+        $numPages = count($pages);
+        // Remove the first element which is the intro text
+        Log::info("In Here");
+        Log::info("Num of pages $numPages");
+
+        foreach ($pages as $page) {
+            Log::info("In loop");
+            if (preg_match('/^(\d+)\D?(.*?)$/s', $page, $matches)) {
+                $pageNumber = $matches[1];
+                $pageContent = trim($matches[2]);
+            } else {
+                // Handle cases where the pattern does not match
+                $pageNumber = null;
+                $pageContent = trim($page); // Default to the entire page content
+            }
+            Log::info("Content");
+            Log::info($pageContent);
+            if ($pageNumber && $pageContent) {
+                $storyPage = new StoryPage([
+                    'story_request_id' => $storyRequest->id,
+                    'page_number' => $pageNumber,
+                    'content' => $pageContent
+                ]);
+                $storyPage->save();
+            }
+        }
+        return $storyRequest;
+    }
+
+    public function generateImages(StoryRequest $storyRequest) {
+        $openai =  OpenAI::client(env('OPENAI_API_KEY'));
+        foreach ($storyRequest->storyPages as $page) {
+            try {
+                $imageResponse = $openai->images()->create([
+                    'model' => "dall-e-3",
+                    'prompt' => $page->content,
+                    'size' => "1024x1024",
+                    'quality' => "standard",
+                    'n' => 1,
+                ]);
+                $imageUrl = $imageResponse->data[0]->url; // Adjust based on actual API response
+                $page->image_url = $imageUrl;
+                $page->save();
+                $url = $this->downloadAndUploadImage($page);
+                //  $page->spaces_image_url = Storage::disk('do_spaces')->url($name);
+                $page->spaces_image_url = $url;
+                $page->save();
+            }
+            catch (\Exception $e) {
+                Log::error('DALL-E API Call Failure: ' . $e->getMessage());
+            }
+        }
+        return $storyRequest;
+    }
+
+    public function downloadAndUploadImage(StoryPage $page):string
+    {
+        $client = new Client();
+        $response = $client->get($page->image_url);
+        $requestId = $page->story_request_id;
+        if ($response->getStatusCode() == 200) {
+            $imageContent = $response->getBody()->getContents();
+
+            // Generate a unique name for the image file
+            $imageName = "$requestId/" . uniqid() . '.png';
+
+            // Save the image to DigitalOcean Spaces
+            Storage::disk('do_spaces')->put($imageName, $imageContent);
+
+            // Construct the URL
+            $spacesUrl = config('filesystems.disks.do_spaces.url');
+            $fullImageUrl = rtrim($spacesUrl, '/') . '/' . ltrim($imageName, '/');
+
+
+            return $fullImageUrl; // Returns the path of the image in the Spaces bucket
+        }
+        else {
+            throw new \Exception('Can not save');
+        }
+        // Handle the error or throw an exception
+    }
+
+    private function callChatGptApi($prompt)
+    {
+        $openai =  OpenAI::client(env('OPENAI_API_KEY'));
+
+        $messages[] = ['role' => 'user', 'content' => $prompt];
+
+        $response = $openai->chat()->create([
+            "model" => "gpt-4-1106-preview",
+            "messages" => $messages
+        ]);
+
+        return $response->choices[0]->message->content ?? 'No response';
+    }
+
 }
 
