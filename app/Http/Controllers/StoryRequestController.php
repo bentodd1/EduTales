@@ -50,7 +50,7 @@ class StoryRequestController extends Controller
         session()->flash('success', 'Story request submitted successfully!
         You should receive an email within 10 minutes with your story.');
 
-        return redirect('/story-request')->with('success', 'Story request submitted successfully!');
+        return redirect('/story-request')->with('success', 'Story request submitted successfully! This may take up 10 minutes to send the email.');
     }
 
 
