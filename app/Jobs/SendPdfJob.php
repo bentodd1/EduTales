@@ -85,18 +85,11 @@ class SendPdfJob implements ShouldQueue
 
     }
 
-
     public function extractPagesFromResponse(StoryRequest $storyRequest) {
         $responseText = $storyRequest->chatgpt_response;
         $pages = explode("Page ", $responseText);
         array_shift($pages);
-        $numPages = count($pages);
-        // Remove the first element which is the intro text
-        Log::info("In Here");
-        Log::info("Num of pages $numPages");
-
         foreach ($pages as $page) {
-            Log::info("In loop");
             if (preg_match('/^(\d+)\D?(.*?)$/s', $page, $matches)) {
                 $pageNumber = $matches[1];
                 $pageContent = trim($matches[2]);
@@ -105,8 +98,6 @@ class SendPdfJob implements ShouldQueue
                 $pageNumber = null;
                 $pageContent = trim($page); // Default to the entire page content
             }
-            Log::info("Content");
-            Log::info($pageContent);
             if ($pageNumber && $pageContent) {
                 $storyPage = new StoryPage([
                     'story_request_id' => $storyRequest->id,

@@ -33,6 +33,9 @@
     <a href="{{ $downloadLink }}">Download your PDF</a>
 
     <p>Thank you for using our service!</p>
+    <p>Please take some time to fill out our survey and share if you enjoyed!</p>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSc3-a120_Lxuyz5eYmXPBVmQNcZW4AGq92hytaJXir6S0geCg/viewform">Fill out our survey</a>
+
 </div>
 
 <div class="footer">
