@@ -24,7 +24,8 @@ class StoryRequestController extends Controller
             'description' => 'required|string',
             'email' => 'required|email',
             'page_number' => 'required|numeric',
-            'sight_words' => 'nullable|string'
+            'sight_words' => 'nullable|string',
+             'language' => 'nullable|string'
         ]);
 
         // Create a new StoryRequest instance and save
@@ -33,7 +34,8 @@ class StoryRequestController extends Controller
             'subject' => $validatedData['subject'],
             'description' => $validatedData['description'],
             'email' => $validatedData['email'],
-            'page_number' => $validatedData['page_number']
+            'page_number' => $validatedData['page_number'],
+            'language' => $validatedData['language']
         ]);
         $storyRequest->save();
         // Handle sight words if provided

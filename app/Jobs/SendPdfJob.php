@@ -77,11 +77,12 @@ class SendPdfJob implements ShouldQueue
         $gradeLevel = $storyRequest->gradeLevel->name; // Assuming GradeLevel has a 'name' field
         $subject = $storyRequest->subject;
         $description = $storyRequest->description;
+        $language = $storyRequest->language;
 
         // Retrieve sight words from the relationship
         $sightWordsString = $storyRequest->sightWords->pluck('word')->implode(', ');
 
-        return "Write a {$pageNumbers}-page {$gradeLevel} level reading story that includes {$subject} and {$description}. The output should just be Page Number: followed by text and nothing else. The first page should be the title page.  Please include the words {$sightWordsString}.";
+        return "Write a {$pageNumbers}-page {$gradeLevel} level reading story in $language that includes {$subject} and {$description}. The output should just be Page Number: followed by text and nothing else. The first page should be the title page.  Please include the words {$sightWordsString}.";
 
     }
 
@@ -89,6 +90,7 @@ class SendPdfJob implements ShouldQueue
         $responseText = $storyRequest->chatgpt_response;
         $pages = explode("Page ", $responseText);
         array_shift($pages);
+        $grade_level = $storyRequest->gradeLevel->name;
         foreach ($pages as $page) {
             if (preg_match('/^(\d+)\D?(.*?)$/s', $page, $matches)) {
                 $pageNumber = $matches[1];

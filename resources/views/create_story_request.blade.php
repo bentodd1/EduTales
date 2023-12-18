@@ -73,6 +73,16 @@
         </div>
 
         <div class="form-group">
+            <label for="language">Language </label>
+
+            <select name="language" id="langauge">
+                    <option value="en">English</option>
+                    <option value="de">German</option>
+                    <option value="zh">Chinese</option>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label for="subject">Subject:</label>
             <input type="text" name="subject" id="subject" required>
         </div>
@@ -87,7 +97,6 @@
             <label for="sight_words">Sight Words (comma-separated):</label>
             <input type="text" name="sight_words" id="sight_words">
         </div>
-
         <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" name="email" id="email" required>
