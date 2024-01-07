@@ -77,8 +77,7 @@
 
             <select name="language" id="langauge">
                     <option value="en">English</option>
-                    <option value="de">German</option>
-                    <option value="zh">Chinese</option>
+{{--                    <option value="zh">Chinese</option>--}}
             </select>
         </div>
 
@@ -94,7 +93,7 @@
 
         <!-- Dynamic Input for Sight Words -->
         <div class="form-group">
-            <label for="sight_words">Sight Words (comma-separated):</label>
+            <label for="sight_words">Words to Learn (comma-separated):</label>
             <input type="text" name="sight_words" id="sight_words">
         </div>
         <div class="form-group">

@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 use App\Http\Controllers\StoryRequestController;
 
+
+Route::get('/', function () {
+    return view('landing');
+});
 // Route to show the form
 Route::get('/story-request', [StoryRequestController::class, 'create']);
 

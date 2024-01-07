@@ -2,11 +2,22 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Story PDF</title>
     <style>
+        @font-face {
+            font-family: 'Firefly';
+            font-style: normal;
+            font-weight: normal;
+            src: url(http://example.com/fonts/firefly.ttf) format('truetype');
+        }
+
         /* Your styles here */
+        p {
+            font-family: firefly, DejaVu Sans, sans-serif;;
+        }
         .page {
             page-break-after: always;
         }
