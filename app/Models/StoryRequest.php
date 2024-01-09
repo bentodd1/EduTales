@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class StoryRequest extends Model
 {
     use HasFactory;
-    protected $fillable = ['grade_level_id', 'subject', 'description', 'page_number', 'email', 'chatgpt_response', 'language'];
+    protected $fillable = ['grade_level_id', 'subject', 'description', 'page_number', 'email', 'chatgpt_response', 'language', 'style'];
 
     public function gradeLevel()
     {

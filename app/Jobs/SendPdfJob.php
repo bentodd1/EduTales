@@ -114,11 +114,14 @@ class SendPdfJob implements ShouldQueue
 
     public function generateImages(StoryRequest $storyRequest) {
         $openai =  OpenAI::client(env('OPENAI_API_KEY'));
+        $style = $storyRequest->style;
         foreach ($storyRequest->storyPages as $page) {
             try {
+                $content = $page->content;
+                $prompt = "in the style of $style. $content";
                 $imageResponse = $openai->images()->create([
                     'model' => "dall-e-3",
-                    'prompt' => $page->content,
+                    'prompt' => $prompt,
                     'size' => "1024x1024",
                     'quality' => "standard",
                     'n' => 1,

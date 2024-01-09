@@ -91,6 +91,13 @@
             <textarea name="description" id="description" required></textarea>
         </div>
 
+        <label for="style">Choose a style:</label>
+        <select name="style" id="style">
+            <option value="Kids Book">Kids Book</option>
+            <option value="Comic">Comic</option>
+            <option value="Realistic">Realistic</option>
+        </select>
+
         <!-- Dynamic Input for Sight Words -->
         <div class="form-group">
             <label for="sight_words">Words to Learn (comma-separated):</label>
