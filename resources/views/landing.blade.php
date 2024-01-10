@@ -13,6 +13,7 @@
         .gallery img { margin: 0 10px; width: 200px; height: auto; }
         .footer { background-color: #f3f3f3; text-align: center; padding: 20px; }
         .pdf-container {
+            overflow-y: auto;
             position: relative;
             padding-top: 56.25%; /* Aspect ratio (16:9) */
             width: 100%;
